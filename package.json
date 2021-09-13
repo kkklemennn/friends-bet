@@ -4,7 +4,7 @@
   "description": "A simple webapp interacting with Ethereum smart contract for betting with friends.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kkklemennn/friends-bet.git"
+    "url": "https://github.com/kkklemennn/friends-bet"
   },
   "author": "kkklemennn",
   "license": "MIT",
