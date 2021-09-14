@@ -4,7 +4,7 @@ contract BetFactory {
     string public name = "BetFactory";
     mapping (address => address[]) public deployedBets;
     
-    function createBet(address payable player2, address referee, uint prize) public {
+    function createBet(address payable player2, address referee, uint256 prize) public {
         Bet newBet = new Bet(msg.sender, player2, referee, prize);
         deployedBets[msg.sender].push(address(newBet));
     }
@@ -26,7 +26,7 @@ contract Bet {
     address[] public allReferees;
     address payable[] public invited;
     mapping (address => bool) hasEntered;
-    uint public prize;
+    uint256 public prize;
     
     function newReff(address referee) private {
         Referee storage newReferee = referees[referee];
@@ -35,7 +35,7 @@ contract Bet {
         allReferees.push(referee);
     }
 
-    constructor(address payable player1, address payable player2, address _referee, uint _prize) payable public {
+    constructor(address payable player1, address payable player2, address _referee, uint256 _prize) payable public {
         require(player1 != _referee && player2 != _referee, "Invalid referee");
         require(player1.balance > _prize, "You do not have enough funds!");
         require(player2.balance > _prize, "Opponent does not have enough funds!");
@@ -85,7 +85,7 @@ contract Bet {
         referees[_referee].confirmed = true;
     }
     
-    function getPrize() public view returns (uint) {
+    function getPrize() public view returns (uint256) {
         return address(this).balance;
     }
     
