@@ -38,7 +38,6 @@ class App extends Component {
     // Load Bet data
     const betData = Bet.networks[networkId];
     if (betData) {
-      console.log("add:" + mybets[0]);
       const bet = new web3.eth.Contract(Bet.abi, mybets[0]);
       this.setState({ bet });
 
@@ -48,13 +47,55 @@ class App extends Component {
 
       // Get referees
       let refereeData = await bet.methods.getReferees().call();
+      let referees = [];
+      // for (var i = 0; i < refereeData.length; i++) {
+      //   if (await bet.methods.isRefereeConfirmed(refereeData[i]).call()) {
+      //     referees.push(
+      //       <div key={refereeData[i]}>
+      //         <li key={refereeData[i]}>
+      //           <b>{refereeData[i]}</b>
+      //         </li>
+      //       </div>
+      //     );
+      //   } else {
+      //     referees.push(
+      //       <li key={refereeData[i]}>
+      //         <div id="refereeContainer">
+      //           {refereeData[i]}
+      //           <span className="float-left text-muted">
+      //             <button
+      //               type="submit"
+      //               className="btn btn-link btn-block btn-sm"
+      //               onClick={(event) => {
+      //                 event.preventDefault();
+      //                 this.props.confirmReferee(refereeData[i]);
+      //               }}
+      //             >
+      //               Confirm
+      //             </button>
+      //           </span>
+      //         </div>
+      //       </li>
+      //     );
+      //   }
+      // }
       this.setState({ referees: refereeData });
 
       // Get Players
-      // Todo: Pobarvati keri so vstopili pa keri ne
       let invitedData = await bet.methods.getInvited().call();
-      let invited = invitedData.map((inv) => <li>{inv}</li>);
-      //console.log(invited);
+      //entered are bold
+      let invited = [];
+      for (var i = 0; i < invitedData.length; i++) {
+        if (await bet.methods.hasPlayerEntered(invitedData[i]).call()) {
+          invited.push(
+            <li key={invitedData[i]}>
+              <b>{invitedData[i]}</b>
+            </li>
+          );
+        } else {
+          invited.push(<li key={invitedData[i]}>{invitedData[i]}</li>);
+        }
+      }
       this.setState({ invited: invited });
     } else {
       window.alert("Bet contract not deployed to detected network.");
@@ -86,6 +127,16 @@ class App extends Component {
       });
   };
 
+  confirmReferee = (referee) => {
+    this.setState({ loading: true });
+    this.state.bet.methods
+      .confirmReferee(referee)
+      .send({ from: this.state.account })
+      .on("transactionHash", (hash) => {
+        this.setState({ loading: false });
+      });
+  };
+
   enter = () => {
     this.setState({ loading: true });
     this.state.bet.methods
@@ -94,6 +145,31 @@ class App extends Component {
       .on("transactionHash", (hash) => {
         this.setState({ loading: false });
       });
+  };
+
+  addPlayer = (player) => {
+    this.setState({ loading: true });
+    this.state.bet.methods
+      .addPlayer(player)
+      .send({ from: this.state.account })
+      .on("transactionHash", (hash) => {
+        this.setState({ loading: false });
+      });
+  };
+
+  suggestReferee = (newreferee) => {
+    this.setState({ loading: true });
+    this.state.bet.methods
+      .suggestReferee(newreferee)
+      .send({ from: this.state.account })
+      .on("transactionHash", (hash) => {
+        this.setState({ loading: false });
+      });
+  };
+
+  isRefereeConfirmed = async (referee) => {
+    let rez = await this.state.bet.methods.isRefereeConfirmed(referee).call();
+    return rez;
   };
 
   constructor(props) {
@@ -127,6 +203,10 @@ class App extends Component {
           prize={this.state.prize}
           createBet={this.createBet}
           enter={this.enter}
+          confirmReferee={this.confirmReferee}
+          addPlayer={this.addPlayer}
+          suggestReferee={this.suggestReferee}
+          isRefereeConfirmed={this.isRefereeConfirmed}
         />
       );
     }

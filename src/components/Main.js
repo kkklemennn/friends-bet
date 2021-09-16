@@ -2,6 +2,75 @@ import React, { Component } from "react";
 
 class Main extends Component {
   render() {
+    let reffs = [];
+    for (var i = 0; i < this.props.referees.length; i++) {
+      let reff = this.props.referees[i];
+      var code = (
+        <li key={reff}>
+          <label id="float-left">{reff}</label>
+          <span className="float-right">
+            <button
+              type="submit"
+              className="btn btn-link btn-block btn-sm"
+              onClick={(event) => {
+                event.preventDefault();
+                this.props.confirmReferee(reff);
+              }}
+            >
+              Confirm
+            </button>
+          </span>
+        </li>
+      );
+      reffs.push(code);
+      // async function generateReff(funct) {
+      //   let confirmed = await funct(reff);
+      //   console.log(confirmed);
+      //   let code;
+      //   if (confirmed) {
+      //     code = (
+      //       <li key={reff}>
+      //         <label id="float-left">
+      //           <b>{reff}</b>
+      //         </label>
+      //       </li>
+      //     );
+      //   } else {
+      //     code = (
+      //       <li key={reff}>
+      //         <label id="float-left">{reff}</label>
+      //         <span className="float-right">
+      //           <button
+      //             type="submit"
+      //             className="btn btn-link btn-block btn-sm"
+      //             onClick={(event) => {
+      //               event.preventDefault();
+      //               this.props.confirmReferee(reff);
+      //             }}
+      //           >
+      //             Confirm
+      //           </button>
+      //         </span>
+      //       </li>
+      //     );
+      //   }
+      //   return code;
+      // }
+
+      // generateReff(this.props.isRefereeConfirmed).then((result) => {
+      //   reffs.push(result);
+      // });
+
+      // async function cakaj(funct) {
+      //   let nekaj = await generateReff(funct);
+      //   console.log(nekaj);
+      //   reffs.push(await nekaj);
+      // }
+      // cakaj(this.props.isRefereeConfirmed);
+    }
+    console.log(reffs);
+    console.log(this.props.invited);
+
     return (
       <div id="content" className="mt-3">
         <div className="card mb-4">
@@ -99,7 +168,7 @@ class Main extends Component {
             <br></br>
             <div>
               Referees:
-              <ul>{this.props.referees}</ul>
+              <ul>{reffs}</ul>
             </div>
             <br></br>
             <div>
@@ -113,10 +182,76 @@ class Main extends Component {
             onClick={(event) => {
               event.preventDefault();
               this.props.enter();
+              //this.props.confirmReferee();
             }}
           >
             Enter
           </button>
+          <br></br>
+          <form
+            className="mb-3"
+            onSubmit={(event) => {
+              event.preventDefault();
+              let newplayer;
+              newplayer = this.newplayer.value.toString();
+              this.props.addPlayer(newplayer);
+            }}
+          >
+            <div className="input-group mb-4">
+              <input
+                name="newplayer"
+                type="text"
+                ref={(newplayer) => {
+                  this.newplayer = newplayer;
+                }}
+                className="form-control form-control-lg"
+                placeholder="Invite a new player"
+                required
+              />
+              <div className="input-group-append">
+                <div className="input-group-text">
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-block btn-sm"
+                  >
+                    Invite
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+          <form
+            className="mb-3"
+            onSubmit={(event) => {
+              event.preventDefault();
+              let newreferee;
+              newreferee = this.newreferee.value.toString();
+              this.props.suggestReferee(newreferee);
+            }}
+          >
+            <div className="input-group mb-4">
+              <input
+                name="newreferee"
+                type="text"
+                ref={(newreferee) => {
+                  this.newreferee = newreferee;
+                }}
+                className="form-control form-control-lg"
+                placeholder="Suggest a referee"
+                required
+              />
+              <div className="input-group-append">
+                <div className="input-group-text">
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-block btn-sm"
+                  >
+                    Suggest
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
     );
