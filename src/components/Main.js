@@ -6,7 +6,6 @@ class Main extends Component {
     for (var i = 0; i < this.props.referees.length; i++) {
       let reff = this.props.referees[i];
       let confirmed = await this.props.isRefereeConfirmed(reff);
-      console.log(confirmed);
       var code;
       if (confirmed) {
         code = (
@@ -37,13 +36,38 @@ class Main extends Component {
       }
       this.reffs.push(code);
     }
-    console.log(this.reffs);
     this.setState(this.reffs);
-    console.log(this.props.invited);
+
+    this.invited = [];
+    for (var i = 0; i < this.props.invitedData.length; i++) {
+      let inv = this.props.invitedData[i];
+      let entered = await this.props.hasPlayerEntered(inv);
+      var code;
+      if (entered) {
+        code = (
+          <li key={inv}>
+            <label id="float-left">
+              <b>{inv}</b>
+            </label>
+          </li>
+        );
+      } else {
+        code = (
+          <li key={inv}>
+            <label id="float-left">{inv}</label>
+          </li>
+        );
+      }
+      this.invited.push(code);
+      console.log(entered);
+    }
+    this.setState(this.invited);
+
+    console.log(this.invited);
+    console.log(this.reffs);
   }
 
   render() {
-    console.log(this.reffs);
     return (
       <div id="content" className="mt-3">
         <div className="card mb-4">
@@ -146,7 +170,7 @@ class Main extends Component {
             <br></br>
             <div>
               Invited:
-              <ul>{this.props.invited}</ul>
+              <ul>{this.invited}</ul>
             </div>
           </div>
           <button

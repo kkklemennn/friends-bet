@@ -51,22 +51,9 @@ class App extends Component {
       let refereeData = await bet.methods.getReferees().call();
       this.setState({ referees: refereeData });
 
-      // Get Players
+      // Get players
       let invitedData = await bet.methods.getInvited().call();
-      //entered are bold
-      let invited = [];
-      for (var i = 0; i < invitedData.length; i++) {
-        if (await bet.methods.hasPlayerEntered(invitedData[i]).call()) {
-          invited.push(
-            <li key={invitedData[i]}>
-              <b>{invitedData[i]}</b>
-            </li>
-          );
-        } else {
-          invited.push(<li key={invitedData[i]}>{invitedData[i]}</li>);
-        }
-      }
-      this.setState({ invited: invited });
+      this.setState({ invitedData: invitedData });
     } else {
       window.alert("Bet contract not deployed to detected network.");
     }
@@ -141,13 +128,18 @@ class App extends Component {
     return rez;
   };
 
+  hasPlayerEntered = async (player) => {
+    let rez = await this.state.bet.methods.hasPlayerEntered(player).call();
+    return rez;
+  };
+
   constructor(props) {
     super(props);
     this.state = {
       account: "0x0",
       ethBalance: "0",
       mybets: [],
-      invited: [],
+      invitedData: [],
       referees: [],
       prize: "0",
       loading: true,
@@ -168,7 +160,7 @@ class App extends Component {
         <Main
           ethBalance={this.state.ethBalance}
           mybets={this.state.mybets}
-          invited={this.state.invited}
+          invitedData={this.state.invitedData}
           referees={this.state.referees}
           prize={this.state.prize}
           createBet={this.createBet}
@@ -177,7 +169,7 @@ class App extends Component {
           addPlayer={this.addPlayer}
           suggestReferee={this.suggestReferee}
           isRefereeConfirmed={this.isRefereeConfirmed}
-          betData={this.state.betData}
+          hasPlayerEntered={this.hasPlayerEntered}
         />
       );
     }
