@@ -1,76 +1,49 @@
 import React, { Component } from "react";
 
 class Main extends Component {
-  render() {
-    let reffs = [];
+  async componentDidMount() {
+    this.reffs = [];
     for (var i = 0; i < this.props.referees.length; i++) {
       let reff = this.props.referees[i];
-      var code = (
-        <li key={reff}>
-          <label id="float-left">{reff}</label>
-          <span className="float-right">
-            <button
-              type="submit"
-              className="btn btn-link btn-block btn-sm"
-              onClick={(event) => {
-                event.preventDefault();
-                this.props.confirmReferee(reff);
-              }}
-            >
-              Confirm
-            </button>
-          </span>
-        </li>
-      );
-      reffs.push(code);
-      // async function generateReff(funct) {
-      //   let confirmed = await funct(reff);
-      //   console.log(confirmed);
-      //   let code;
-      //   if (confirmed) {
-      //     code = (
-      //       <li key={reff}>
-      //         <label id="float-left">
-      //           <b>{reff}</b>
-      //         </label>
-      //       </li>
-      //     );
-      //   } else {
-      //     code = (
-      //       <li key={reff}>
-      //         <label id="float-left">{reff}</label>
-      //         <span className="float-right">
-      //           <button
-      //             type="submit"
-      //             className="btn btn-link btn-block btn-sm"
-      //             onClick={(event) => {
-      //               event.preventDefault();
-      //               this.props.confirmReferee(reff);
-      //             }}
-      //           >
-      //             Confirm
-      //           </button>
-      //         </span>
-      //       </li>
-      //     );
-      //   }
-      //   return code;
-      // }
-
-      // generateReff(this.props.isRefereeConfirmed).then((result) => {
-      //   reffs.push(result);
-      // });
-
-      // async function cakaj(funct) {
-      //   let nekaj = await generateReff(funct);
-      //   console.log(nekaj);
-      //   reffs.push(await nekaj);
-      // }
-      // cakaj(this.props.isRefereeConfirmed);
+      let confirmed = await this.props.isRefereeConfirmed(reff);
+      console.log(confirmed);
+      var code;
+      if (confirmed) {
+        code = (
+          <li key={reff}>
+            <label id="float-left">
+              <b>{reff}</b>
+            </label>
+          </li>
+        );
+      } else {
+        code = (
+          <li key={reff}>
+            <label id="float-left">{reff}</label>
+            <span className="float-right">
+              <button
+                type="submit"
+                className="btn btn-link btn-block btn-sm"
+                onClick={(event) => {
+                  event.preventDefault();
+                  this.props.confirmReferee(reff);
+                }}
+              >
+                Confirm
+              </button>
+            </span>
+          </li>
+        );
+      }
+      this.reffs.push(code);
     }
-    console.log(reffs);
+    console.log(this.reffs);
+    this.setState(this.reffs);
     console.log(this.props.invited);
+  }
 
+  render() {
+    console.log(this.reffs);
     return (
       <div id="content" className="mt-3">
         <div className="card mb-4">
@@ -168,7 +141,7 @@ class Main extends Component {
             <br></br>
             <div>
               Referees:
-              <ul>{reffs}</ul>
+              <ul>{this.reffs}</ul>
             </div>
             <br></br>
             <div>
@@ -182,7 +155,6 @@ class Main extends Component {
             onClick={(event) => {
               event.preventDefault();
               this.props.enter();
-              //this.props.confirmReferee();
             }}
           >
             Enter

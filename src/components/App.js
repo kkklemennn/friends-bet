@@ -36,49 +36,19 @@ class App extends Component {
     }
 
     // Load Bet data
-    const betData = Bet.networks[networkId];
-    if (betData) {
+    const betOnNet = Bet.networks[networkId];
+    if (betOnNet) {
+      var betData = {};
       const bet = new web3.eth.Contract(Bet.abi, mybets[0]);
       this.setState({ bet });
 
       //Get prize
       var prizeData = await bet.methods.prize().call();
+      betData[mybets[0]] = prizeData;
       this.setState({ prize: prizeData });
 
       // Get referees
       let refereeData = await bet.methods.getReferees().call();
-      let referees = [];
-      // for (var i = 0; i < refereeData.length; i++) {
-      //   if (await bet.methods.isRefereeConfirmed(refereeData[i]).call()) {
-      //     referees.push(
-      //       <div key={refereeData[i]}>
-      //         <li key={refereeData[i]}>
-      //           <b>{refereeData[i]}</b>
-      //         </li>
-      //       </div>
-      //     );
-      //   } else {
-      //     referees.push(
-      //       <li key={refereeData[i]}>
-      //         <div id="refereeContainer">
-      //           {refereeData[i]}
-      //           <span className="float-left text-muted">
-      //             <button
-      //               type="submit"
-      //               className="btn btn-link btn-block btn-sm"
-      //               onClick={(event) => {
-      //                 event.preventDefault();
-      //                 this.props.confirmReferee(refereeData[i]);
-      //               }}
-      //             >
-      //               Confirm
-      //             </button>
-      //           </span>
-      //         </div>
-      //       </li>
-      //     );
-      //   }
-      // }
       this.setState({ referees: refereeData });
 
       // Get Players
@@ -100,7 +70,6 @@ class App extends Component {
     } else {
       window.alert("Bet contract not deployed to detected network.");
     }
-
     this.setState({ loading: false });
   }
 
@@ -182,6 +151,7 @@ class App extends Component {
       referees: [],
       prize: "0",
       loading: true,
+      betData: {},
     };
   }
 
@@ -207,6 +177,7 @@ class App extends Component {
           addPlayer={this.addPlayer}
           suggestReferee={this.suggestReferee}
           isRefereeConfirmed={this.isRefereeConfirmed}
+          betData={this.state.betData}
         />
       );
     }
