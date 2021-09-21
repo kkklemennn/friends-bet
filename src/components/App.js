@@ -29,7 +29,9 @@ class App extends Component {
         betFactoryData.address
       );
       this.setState({ betFactory });
-      var mybets = await betFactory.methods.myBets().call();
+      var mybets = await betFactory.methods
+        .myBets()
+        .call({ from: this.state.account });
       this.setState({ mybets: mybets });
     } else {
       window.alert("BetFactory contract not deployed to detected network.");
@@ -38,26 +40,41 @@ class App extends Component {
     // Load Bet data
     const betOnNet = Bet.networks[networkId];
     if (betOnNet) {
-      var betData = {};
-      const bet = new web3.eth.Contract(Bet.abi, mybets[0]);
-      this.setState({ bet });
-
-      //Get prize
-      var prizeData = await bet.methods.prize().call();
-      betData[mybets[0]] = prizeData;
+      var prizeData, refereeData, invitedData;
+      [prizeData, refereeData, invitedData] = await this.getBetData(
+        mybets,
+        web3
+      );
       this.setState({ prize: prizeData });
-
-      // Get referees
-      let refereeData = await bet.methods.getReferees().call();
       this.setState({ referees: refereeData });
-
-      // Get players
-      let invitedData = await bet.methods.getInvited().call();
       this.setState({ invitedData: invitedData });
     } else {
       window.alert("Bet contract not deployed to detected network.");
     }
     this.setState({ loading: false });
+  }
+
+  async getBetData(mybets, web3) {
+    var prizeData = [];
+    var refereeData = [];
+    var invitedData = [];
+    for (let i = 0; i < mybets.length; i++) {
+      const bet = new web3.eth.Contract(Bet.abi, mybets[i]);
+      this.setState({ bet });
+
+      //Get prize
+      var prize = await bet.methods.prize().call();
+      prizeData.push(prize);
+
+      // Get referees
+      var reffs = await bet.methods.getReferees().call();
+      refereeData.push(reffs);
+
+      // Get players
+      var invited = await bet.methods.getInvited().call();
+      invitedData.push(invited);
+    }
+    return [prizeData, refereeData, invitedData];
   }
 
   async loadWeb3() {
@@ -124,13 +141,11 @@ class App extends Component {
   };
 
   isRefereeConfirmed = async (referee) => {
-    let rez = await this.state.bet.methods.isRefereeConfirmed(referee).call();
-    return rez;
+    return await this.state.bet.methods.isRefereeConfirmed(referee).call();
   };
 
   hasPlayerEntered = async (player) => {
-    let rez = await this.state.bet.methods.hasPlayerEntered(player).call();
-    return rez;
+    return await this.state.bet.methods.hasPlayerEntered(player).call();
   };
 
   constructor(props) {
@@ -143,7 +158,6 @@ class App extends Component {
       referees: [],
       prize: "0",
       loading: true,
-      betData: {},
     };
   }
 
