@@ -100,9 +100,11 @@ class App extends Component {
       });
   };
 
-  confirmReferee = (referee) => {
+  confirmReferee = (referee, betaddr) => {
     this.setState({ loading: true });
-    this.state.bet.methods
+    const web3 = window.web3;
+    const bet = new web3.eth.Contract(Bet.abi, betaddr);
+    bet.methods
       .confirmReferee(referee)
       .send({ from: this.state.account })
       .on("transactionHash", (hash) => {
@@ -110,19 +112,23 @@ class App extends Component {
       });
   };
 
-  enter = () => {
+  enter = (betaddr, prize) => {
     this.setState({ loading: true });
-    this.state.bet.methods
+    const web3 = window.web3;
+    const bet = new web3.eth.Contract(Bet.abi, betaddr);
+    bet.methods
       .enter()
-      .send({ from: this.state.account, value: this.state.prize })
+      .send({ from: this.state.account, value: prize })
       .on("transactionHash", (hash) => {
         this.setState({ loading: false });
       });
   };
 
-  addPlayer = (player) => {
+  addPlayer = (player, betaddr) => {
     this.setState({ loading: true });
-    this.state.bet.methods
+    const web3 = window.web3;
+    const bet = new web3.eth.Contract(Bet.abi, betaddr);
+    bet.methods
       .addPlayer(player)
       .send({ from: this.state.account })
       .on("transactionHash", (hash) => {
@@ -130,9 +136,11 @@ class App extends Component {
       });
   };
 
-  suggestReferee = (newreferee) => {
+  suggestReferee = (newreferee, betaddr) => {
     this.setState({ loading: true });
-    this.state.bet.methods
+    const web3 = window.web3;
+    const bet = new web3.eth.Contract(Bet.abi, betaddr);
+    bet.methods
       .suggestReferee(newreferee)
       .send({ from: this.state.account })
       .on("transactionHash", (hash) => {
@@ -140,12 +148,16 @@ class App extends Component {
       });
   };
 
-  isRefereeConfirmed = async (referee) => {
-    return await this.state.bet.methods.isRefereeConfirmed(referee).call();
+  isRefereeConfirmed = async (referee, betaddr) => {
+    const web3 = window.web3;
+    const bet = new web3.eth.Contract(Bet.abi, betaddr);
+    return await bet.methods.isRefereeConfirmed(referee).call();
   };
 
-  hasPlayerEntered = async (player) => {
-    return await this.state.bet.methods.hasPlayerEntered(player).call();
+  hasPlayerEntered = async (player, betaddr) => {
+    const web3 = window.web3;
+    const bet = new web3.eth.Contract(Bet.abi, betaddr);
+    return await bet.methods.hasPlayerEntered(player).call();
   };
 
   constructor(props) {

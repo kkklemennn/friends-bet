@@ -1,17 +1,35 @@
 import React, { Component } from "react";
 
 class Main extends Component {
+  constructor() {
+    super();
+    this.state = {};
+    this.renderBets = this.renderBets.bind(this);
+  }
   async componentDidMount() {
-    this.allBets = [];
+    this.setState({ loading: true });
+    this.renderBets();
+  }
+
+  async renderBets() {
+    var allBets = [];
     for (var b = 0; b < this.props.mybets.length; b++) {
+      var currentBetAddr = this.props.mybets[b];
+      var currentPrize = this.props.prize[b];
       this.invited = [];
       this.reffs = [];
-      let isReff = await this.props.isRefereeConfirmed(this.props.account);
-      var reffs = this.props.referees[0];
+      let isReff = await this.props.isRefereeConfirmed(
+        this.props.account,
+        currentBetAddr
+      );
+      var reffs = this.props.referees[b];
       // Preparing refferees
       for (var i = 0; i < reffs.length; i++) {
         let reff = reffs[i];
-        let confirmed = await this.props.isRefereeConfirmed(reff);
+        let confirmed = await this.props.isRefereeConfirmed(
+          reff,
+          currentBetAddr
+        );
         var code;
         if (!isReff) {
           if (confirmed) {
@@ -23,23 +41,36 @@ class Main extends Component {
               </li>
             );
           } else {
-            code = (
-              <li key={reff}>
-                <label id="float-left">{reff}</label>
-                <span className="float-right">
-                  <button
-                    type="submit"
-                    className="btn btn-link btn-block btn-sm"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      this.props.confirmReferee(reff);
-                    }}
-                  >
-                    Confirm
-                  </button>
-                </span>
-              </li>
+            let entered = await this.props.hasPlayerEntered(
+              this.props.account,
+              currentBetAddr
             );
+            if (entered) {
+              code = (
+                <li key={reff}>
+                  <label id="float-left">{reff}</label>
+                  <span className="float-right">
+                    <button
+                      type="submit"
+                      className="btn btn-link btn-block btn-sm"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        this.props.confirmReferee(reff, currentBetAddr);
+                      }}
+                    >
+                      Confirm
+                    </button>
+                  </span>
+                </li>
+              );
+            } else {
+              code = (
+                <li key={reff}>
+                  <label id="float-left">{reff}</label>
+                  <span className="float-right"></span>
+                </li>
+              );
+            }
           }
         } else {
           if (!confirmed) {
@@ -63,10 +94,10 @@ class Main extends Component {
       this.setState(this.reffs);
 
       // Preparing invited players
-      var invtd = this.props.invitedData[0];
+      var invtd = this.props.invitedData[b];
       for (var i = 0; i < invtd.length; i++) {
         let inv = invtd[i];
-        let entered = await this.props.hasPlayerEntered(inv);
+        let entered = await this.props.hasPlayerEntered(inv, currentBetAddr);
         var code;
         if (isReff) {
           if (entered) {
@@ -112,7 +143,12 @@ class Main extends Component {
               </li>
             );
             // Preparing buttons
-            if (await this.props.hasPlayerEntered(this.props.account)) {
+            if (
+              await this.props.hasPlayerEntered(
+                this.props.account,
+                currentBetAddr
+              )
+            ) {
               this.enterButton = (
                 <button className="btn btn-secondary btn-block btn-md">
                   You have already entered!
@@ -126,7 +162,7 @@ class Main extends Component {
                     event.preventDefault();
                     let newplayer;
                     newplayer = this.newplayer.value.toString();
-                    this.props.addPlayer(newplayer);
+                    this.props.addPlayer(newplayer, currentBetAddr);
                   }}
                 >
                   <div className="input-group mb-4">
@@ -161,7 +197,7 @@ class Main extends Component {
                     event.preventDefault();
                     let newreferee;
                     newreferee = this.newreferee.value.toString();
-                    this.props.suggestReferee(newreferee);
+                    this.props.suggestReferee(newreferee, currentBetAddr);
                   }}
                 >
                   <div className="input-group mb-4">
@@ -195,7 +231,7 @@ class Main extends Component {
                   className="btn btn-danger btn-block btn-md"
                   onClick={(event) => {
                     event.preventDefault();
-                    this.props.enter();
+                    this.props.enter(currentBetAddr, currentPrize);
                   }}
                 >
                   Enter
@@ -262,14 +298,14 @@ class Main extends Component {
 
       // Rendering bet
       var currentBet = (
-        <div className="card mb-6" key={this.props.mybets[b]}>
+        <div className="card mb-6" key={currentBetAddr}>
           <div className="card-body">
             <label className="float-left">
               <b>Bet: </b>
-              {this.props.mybets[b]}
+              {currentBetAddr}
             </label>
             <span className="float-right text-muted">
-              Entry: {window.web3.utils.fromWei(this.props.prize[b], "Ether")}
+              Entry: {window.web3.utils.fromWei(currentPrize, "Ether")}
               {" \u039e"}
             </span>
             <br></br>
@@ -289,12 +325,14 @@ class Main extends Component {
           </div>
         </div>
       );
-      this.allBets.push(currentBet);
+      allBets.push(currentBet);
     }
-    console.log(this.allBets);
+    this.setState({ allbets: allBets });
+    this.setState({ loading: false });
   }
 
   render() {
+    const { allbets } = this.state;
     return (
       <div id="content" className="mt-3">
         <div className="card mb-4">
@@ -382,7 +420,7 @@ class Main extends Component {
           </div>
         </div>
 
-        <div className="bets">{this.allBets}</div>
+        <div className="bets">{allbets}</div>
       </div>
     );
   }
