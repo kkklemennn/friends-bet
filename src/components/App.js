@@ -158,6 +158,7 @@ class App extends Component {
     } else {
       content = (
         <Main
+          account={this.state.account}
           ethBalance={this.state.ethBalance}
           mybets={this.state.mybets}
           invitedData={this.state.invitedData}

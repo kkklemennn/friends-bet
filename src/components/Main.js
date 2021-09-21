@@ -2,6 +2,7 @@ import React, { Component } from "react";
 
 class Main extends Component {
   async componentDidMount() {
+    // Preparing refferees
     this.reffs = [];
     for (var i = 0; i < this.props.referees.length; i++) {
       let reff = this.props.referees[i];
@@ -38,6 +39,7 @@ class Main extends Component {
     }
     this.setState(this.reffs);
 
+    // Preparing invited players
     this.invited = [];
     for (var i = 0; i < this.props.invitedData.length; i++) {
       let inv = this.props.invitedData[i];
@@ -59,12 +61,152 @@ class Main extends Component {
         );
       }
       this.invited.push(code);
-      console.log(entered);
     }
     this.setState(this.invited);
 
-    console.log(this.invited);
-    console.log(this.reffs);
+    // Preparing buttons
+    if (await this.props.hasPlayerEntered(this.props.account)) {
+      this.enterButton = (
+        <button className="btn btn-secondary btn-block btn-md">
+          You have already entered!
+        </button>
+      );
+
+      this.inviteButton = (
+        <form
+          className="mb-3"
+          onSubmit={(event) => {
+            event.preventDefault();
+            let newplayer;
+            newplayer = this.newplayer.value.toString();
+            this.props.addPlayer(newplayer);
+          }}
+        >
+          <div className="input-group mb-4">
+            <input
+              name="newplayer"
+              type="text"
+              ref={(newplayer) => {
+                this.newplayer = newplayer;
+              }}
+              className="form-control form-control-lg"
+              placeholder="Invite a new player"
+              required
+            />
+            <div className="input-group-append">
+              <div className="input-group-text">
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-block btn-sm"
+                >
+                  Invite
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      );
+
+      this.suggestButton = (
+        <form
+          className="mb-3"
+          onSubmit={(event) => {
+            event.preventDefault();
+            let newreferee;
+            newreferee = this.newreferee.value.toString();
+            this.props.suggestReferee(newreferee);
+          }}
+        >
+          <div className="input-group mb-4">
+            <input
+              name="newreferee"
+              type="text"
+              ref={(newreferee) => {
+                this.newreferee = newreferee;
+              }}
+              className="form-control form-control-lg"
+              placeholder="Suggest a referee"
+              required
+            />
+            <div className="input-group-append">
+              <div className="input-group-text">
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-block btn-sm"
+                >
+                  Suggest
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      );
+    } else {
+      this.enterButton = (
+        <button
+          type="submit"
+          className="btn btn-danger btn-block btn-md"
+          onClick={(event) => {
+            event.preventDefault();
+            this.props.enter();
+          }}
+        >
+          Enter
+        </button>
+      );
+
+      this.inviteButton = (
+        <form className="mb-3">
+          <div className="input-group mb-4">
+            <input
+              className="form-control form-control-lg"
+              type="text"
+              placeholder="Enter the bet to invite a player"
+              readOnly="readOnly"
+            />
+            <div className="input-group-append">
+              <div className="input-group-text">
+                <button
+                  className="btn btn-secondary btn-block btn-sm"
+                  disabled={true}
+                >
+                  Invite
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      );
+
+      this.suggestButton = (
+        <form className="mb-3">
+          <div className="input-group mb-4">
+            <input
+              name="newreferee"
+              type="text"
+              className="form-control form-control-lg"
+              placeholder="Enter the bet to suggest a referee"
+              readOnly="readOnly"
+            />
+            <div className="input-group-append">
+              <div className="input-group-text">
+                <button
+                  type="submit"
+                  className="btn btn-secondary btn-block btn-sm"
+                  disabled={true}
+                >
+                  Suggest
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      );
+    }
+
+    this.setState(this.enterButton);
+    this.setState(this.inviteButton);
+    this.setState(this.suggestButton);
   }
 
   render() {
@@ -90,7 +232,10 @@ class Main extends Component {
                 </label>
                 <span className="float-right text-muted">
                   Balance:{" "}
-                  {window.web3.utils.fromWei(this.props.ethBalance, "Ether")}
+                  {parseFloat(
+                    window.web3.utils.fromWei(this.props.ethBalance, "Ether")
+                  ).toFixed(4)}
+                  {" \u039e"}
                 </span>
               </div>
               <div className="input-group mb-4">
@@ -173,81 +318,10 @@ class Main extends Component {
               <ul>{this.invited}</ul>
             </div>
           </div>
-          <button
-            type="submit"
-            className="btn btn-danger btn-block btn-md"
-            onClick={(event) => {
-              event.preventDefault();
-              this.props.enter();
-            }}
-          >
-            Enter
-          </button>
+          {this.enterButton}
           <br></br>
-          <form
-            className="mb-3"
-            onSubmit={(event) => {
-              event.preventDefault();
-              let newplayer;
-              newplayer = this.newplayer.value.toString();
-              this.props.addPlayer(newplayer);
-            }}
-          >
-            <div className="input-group mb-4">
-              <input
-                name="newplayer"
-                type="text"
-                ref={(newplayer) => {
-                  this.newplayer = newplayer;
-                }}
-                className="form-control form-control-lg"
-                placeholder="Invite a new player"
-                required
-              />
-              <div className="input-group-append">
-                <div className="input-group-text">
-                  <button
-                    type="submit"
-                    className="btn btn-primary btn-block btn-sm"
-                  >
-                    Invite
-                  </button>
-                </div>
-              </div>
-            </div>
-          </form>
-          <form
-            className="mb-3"
-            onSubmit={(event) => {
-              event.preventDefault();
-              let newreferee;
-              newreferee = this.newreferee.value.toString();
-              this.props.suggestReferee(newreferee);
-            }}
-          >
-            <div className="input-group mb-4">
-              <input
-                name="newreferee"
-                type="text"
-                ref={(newreferee) => {
-                  this.newreferee = newreferee;
-                }}
-                className="form-control form-control-lg"
-                placeholder="Suggest a referee"
-                required
-              />
-              <div className="input-group-append">
-                <div className="input-group-text">
-                  <button
-                    type="submit"
-                    className="btn btn-primary btn-block btn-sm"
-                  >
-                    Suggest
-                  </button>
-                </div>
-              </div>
-            </div>
-          </form>
+          {this.inviteButton}
+          {this.suggestButton}
         </div>
       </div>
     );
