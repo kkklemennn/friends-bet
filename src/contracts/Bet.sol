@@ -16,6 +16,23 @@ contract BetFactory {
     function pushBet(address player) public {
         deployedBets[player].push(msg.sender);
     }
+
+    function deleteBet(address referee) public {
+        if (deployedBets[referee].length > 1){
+            uint lastBet = deployedBets[referee].length-1;
+            for (uint i=0; i < lastBet; i++) {
+                if (deployedBets[referee][i] == msg.sender) {
+                    deployedBets[referee][i] = deployedBets[referee][lastBet];
+                    deployedBets[referee].length--;
+                    break;
+                }
+            }
+        }else {
+            delete deployedBets[referee][0];
+            deployedBets[referee].length--;
+        }
+    }
+    
 }
 
 contract Bet {
@@ -60,6 +77,7 @@ contract Bet {
     
     function addPlayer(address payable newPlayer) public onlyPlayer {
         require(newPlayer.balance > prize);
+        require(address(referees[newPlayer].suggestedBy) == address(0), "Referee can not be player.");
         invited.push(newPlayer);
     }
 
@@ -77,9 +95,19 @@ contract Bet {
         require(!referees[player].confirmed, "You sneaky sneaky");
         require(hasEntered[player], "Player has not entered");
         player.transfer(address(this).balance);
+        for (uint i=0; i < invited.length; i++) {
+            hasEntered[invited[i]] = false;
+        }
+        for (uint i=0; i < allReferees.length; i++) {
+            delete referees[allReferees[i]];
+            betfactory.deleteBet(allReferees[i]);
+            delete allReferees[i];
+            allReferees.length--;
+        }
     }
     
     function suggestReferee(address _referee) public onlyPlayer {
+        require(!hasEntered[_referee], "Player can not be referee");
         require(msg.sender != _referee, "Cannot suggest self.");
         require(referees[_referee].suggestedBy == address(0), "Referee already exists.");
         newReff(_referee);

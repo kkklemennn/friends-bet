@@ -124,6 +124,18 @@ class App extends Component {
       });
   };
 
+  pickWinner = (player, betaddr) => {
+    this.setState({ loading: true });
+    const web3 = window.web3;
+    const bet = new web3.eth.Contract(Bet.abi, betaddr);
+    bet.methods
+      .pickWinner(player)
+      .send({ from: this.state.account })
+      .on("transactionHash", (hash) => {
+        this.setState({ loading: false });
+      });
+  };
+
   addPlayer = (player, betaddr) => {
     this.setState({ loading: true });
     const web3 = window.web3;
@@ -197,6 +209,7 @@ class App extends Component {
           suggestReferee={this.suggestReferee}
           isRefereeConfirmed={this.isRefereeConfirmed}
           hasPlayerEntered={this.hasPlayerEntered}
+          pickWinner={this.pickWinner}
         />
       );
     }

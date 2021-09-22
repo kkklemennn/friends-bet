@@ -79,15 +79,25 @@ contract("BetFactory", ([player1, player2, referee, player3]) => {
     });
 
     it("picks winner", async () => {
+      const initialBets = await betFactory.myBets({ from: referee });
       const initialBalance = await web3.eth.getBalance(player2);
       await bet.pickWinner(player2, { from: referee });
+      const finalBets = await betFactory.myBets({ from: referee });
       const finalBalance = await web3.eth.getBalance(player2);
-      const difference = finalBalance - initialBalance;
+      const balanceDifference = finalBalance - initialBalance;
+      const betDifference = initialBets.length - finalBets.length;
 
       assert.isAtLeast(
-        Number(difference),
+        Number(balanceDifference),
         Number(web3.utils.toWei("2.8", "ether"))
       );
+      let entered = await bet.hasPlayerEntered(player2);
+      assert.equal(entered.toString(), "false");
+      let referees = await bet.getReferees();
+      let isconfirmed = await bet.isRefereeConfirmed(referee);
+      assert.equal(isconfirmed.toString(), "false");
+      assert.equal(referees.length, 0);
+      assert.equal(betDifference, 1);
     });
   });
 });

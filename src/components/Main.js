@@ -22,6 +22,10 @@ class Main extends Component {
         this.props.account,
         currentBetAddr
       );
+      var accountentered = await this.props.hasPlayerEntered(
+        this.props.account,
+        currentBetAddr
+      );
       var reffs = this.props.referees[b];
       // Preparing refferees
       for (var i = 0; i < reffs.length; i++) {
@@ -41,11 +45,7 @@ class Main extends Component {
               </li>
             );
           } else {
-            let entered = await this.props.hasPlayerEntered(
-              this.props.account,
-              currentBetAddr
-            );
-            if (entered) {
+            if (accountentered) {
               code = (
                 <li key={reff}>
                   <label id="float-left">{reff}</label>
@@ -98,6 +98,7 @@ class Main extends Component {
       for (var i = 0; i < invtd.length; i++) {
         let inv = invtd[i];
         let entered = await this.props.hasPlayerEntered(inv, currentBetAddr);
+        console.log(accountentered);
         var code;
         if (isReff) {
           if (entered) {
@@ -112,6 +113,7 @@ class Main extends Component {
                     className="btn btn-link btn-block btn-sm"
                     onClick={(event) => {
                       event.preventDefault();
+                      this.props.pickWinner(inv, currentBetAddr);
                     }}
                   >
                     Pick winner
@@ -142,152 +144,149 @@ class Main extends Component {
                 <label id="float-left">{inv}</label>
               </li>
             );
-            // Preparing buttons
-            if (
-              await this.props.hasPlayerEntered(
-                this.props.account,
-                currentBetAddr
-              )
-            ) {
-              this.enterButton = (
-                <button className="btn btn-secondary btn-block btn-md">
-                  You have already entered!
-                </button>
-              );
-
-              this.inviteButton = (
-                <form
-                  className="mb-3"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    let newplayer;
-                    newplayer = this.newplayer.value.toString();
-                    this.props.addPlayer(newplayer, currentBetAddr);
-                  }}
-                >
-                  <div className="input-group mb-4">
-                    <input
-                      name="newplayer"
-                      type="text"
-                      ref={(newplayer) => {
-                        this.newplayer = newplayer;
-                      }}
-                      className="form-control form-control-lg"
-                      placeholder="Invite a new player"
-                      required
-                    />
-                    <div className="input-group-append">
-                      <div className="input-group-text">
-                        <button
-                          type="submit"
-                          className="btn btn-primary btn-block btn-sm"
-                        >
-                          Invite
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </form>
-              );
-
-              this.suggestButton = (
-                <form
-                  className="mb-3"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    let newreferee;
-                    newreferee = this.newreferee.value.toString();
-                    this.props.suggestReferee(newreferee, currentBetAddr);
-                  }}
-                >
-                  <div className="input-group mb-4">
-                    <input
-                      name="newreferee"
-                      type="text"
-                      ref={(newreferee) => {
-                        this.newreferee = newreferee;
-                      }}
-                      className="form-control form-control-lg"
-                      placeholder="Suggest a referee"
-                      required
-                    />
-                    <div className="input-group-append">
-                      <div className="input-group-text">
-                        <button
-                          type="submit"
-                          className="btn btn-primary btn-block btn-sm"
-                        >
-                          Suggest
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </form>
-              );
-            } else {
-              this.enterButton = (
-                <button
-                  type="submit"
-                  className="btn btn-danger btn-block btn-md"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    this.props.enter(currentBetAddr, currentPrize);
-                  }}
-                >
-                  Enter
-                </button>
-              );
-
-              this.inviteButton = (
-                <form className="mb-3">
-                  <div className="input-group mb-4">
-                    <input
-                      className="form-control form-control-lg"
-                      type="text"
-                      placeholder="Enter the bet to invite a player"
-                      readOnly="readOnly"
-                    />
-                    <div className="input-group-append">
-                      <div className="input-group-text">
-                        <button
-                          className="btn btn-secondary btn-block btn-sm"
-                          disabled={true}
-                        >
-                          Invite
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </form>
-              );
-
-              this.suggestButton = (
-                <form className="mb-3">
-                  <div className="input-group mb-4">
-                    <input
-                      name="newreferee"
-                      type="text"
-                      className="form-control form-control-lg"
-                      placeholder="Enter the bet to suggest a referee"
-                      readOnly="readOnly"
-                    />
-                    <div className="input-group-append">
-                      <div className="input-group-text">
-                        <button
-                          type="submit"
-                          className="btn btn-secondary btn-block btn-sm"
-                          disabled={true}
-                        >
-                          Suggest
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </form>
-              );
-            }
           }
           this.invited.push(code);
+        }
+      }
+      // Preparing buttons
+      if (!isReff) {
+        if (accountentered) {
+          this.enterButton = (
+            <button className="btn btn-secondary btn-block btn-md">
+              You have already entered!
+            </button>
+          );
+
+          this.inviteButton = (
+            <form
+              className="mb-3"
+              onSubmit={(event) => {
+                event.preventDefault();
+                let newplayer;
+                newplayer = this.newplayer.value.toString();
+                this.props.addPlayer(newplayer, currentBetAddr);
+              }}
+            >
+              <div className="input-group mb-4">
+                <input
+                  name="newplayer"
+                  type="text"
+                  ref={(newplayer) => {
+                    this.newplayer = newplayer;
+                  }}
+                  className="form-control form-control-lg"
+                  placeholder="Invite a new player"
+                  required
+                />
+                <div className="input-group-append">
+                  <div className="input-group-text">
+                    <button
+                      type="submit"
+                      className="btn btn-primary btn-block btn-sm"
+                    >
+                      Invite
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          );
+
+          this.suggestButton = (
+            <form
+              className="mb-3"
+              onSubmit={(event) => {
+                event.preventDefault();
+                let newreferee;
+                newreferee = this.newreferee.value.toString();
+                this.props.suggestReferee(newreferee, currentBetAddr);
+              }}
+            >
+              <div className="input-group mb-4">
+                <input
+                  name="newreferee"
+                  type="text"
+                  ref={(newreferee) => {
+                    this.newreferee = newreferee;
+                  }}
+                  className="form-control form-control-lg"
+                  placeholder="Suggest a referee"
+                  required
+                />
+                <div className="input-group-append">
+                  <div className="input-group-text">
+                    <button
+                      type="submit"
+                      className="btn btn-primary btn-block btn-sm"
+                    >
+                      Suggest
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          );
+        } else {
+          this.enterButton = (
+            <button
+              type="submit"
+              className="btn btn-danger btn-block btn-md"
+              onClick={(event) => {
+                event.preventDefault();
+                this.props.enter(currentBetAddr, currentPrize);
+              }}
+            >
+              Enter
+            </button>
+          );
+
+          this.inviteButton = (
+            <form className="mb-3">
+              <div className="input-group mb-4">
+                <input
+                  className="form-control form-control-lg"
+                  type="text"
+                  placeholder="Enter the bet to invite a player"
+                  readOnly="readOnly"
+                />
+                <div className="input-group-append">
+                  <div className="input-group-text">
+                    <button
+                      className="btn btn-secondary btn-block btn-sm"
+                      disabled={true}
+                    >
+                      Invite
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          );
+
+          this.suggestButton = (
+            <form className="mb-3">
+              <div className="input-group mb-4">
+                <input
+                  name="newreferee"
+                  type="text"
+                  className="form-control form-control-lg"
+                  placeholder="Enter the bet to suggest a referee"
+                  readOnly="readOnly"
+                />
+                <div className="input-group-append">
+                  <div className="input-group-text">
+                    <button
+                      type="submit"
+                      className="btn btn-secondary btn-block btn-sm"
+                      disabled={true}
+                    >
+                      Suggest
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          );
         }
       }
       this.setState(this.invited);
