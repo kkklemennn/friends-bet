@@ -5,12 +5,16 @@ contract BetFactory {
     mapping (address => address[]) public deployedBets;
     
     function createBet(address payable player2, address referee, uint256 prize) public {
-        Bet newBet = new Bet(msg.sender, player2, referee, prize);
+        Bet newBet = new Bet(msg.sender, player2, referee, prize, address(this));
         deployedBets[msg.sender].push(address(newBet));
     }
     
     function myBets() public view returns (address[] memory) {
         return deployedBets[msg.sender];
+    }
+    
+    function pushBet(address player) public {
+        deployedBets[player].push(msg.sender);
     }
 }
 
@@ -27,6 +31,7 @@ contract Bet {
     address payable[] public invited;
     mapping (address => bool) hasEntered;
     uint256 public prize;
+    BetFactory betfactory;
     
     function newReff(address referee) private {
         Referee storage newReferee = referees[referee];
@@ -35,7 +40,7 @@ contract Bet {
         allReferees.push(referee);
     }
 
-    constructor(address payable player1, address payable player2, address _referee, uint256 _prize) payable public {
+    constructor(address payable player1, address payable player2, address _referee, uint256 _prize, address betfactoryaddr) payable public {
         require(player1 != _referee && player2 != _referee, "Invalid referee");
         require(player1.balance > _prize, "You do not have enough funds!");
         require(player2.balance > _prize, "Opponent does not have enough funds!");
@@ -43,6 +48,8 @@ contract Bet {
         prize = _prize;
         invited.push(player1);
         invited.push(player2);
+        betfactory = BetFactory(betfactoryaddr);
+        betfactory.pushBet(player2);
     }
 
     function enter() public payable {
@@ -83,6 +90,7 @@ contract Bet {
         require(!referees[_referee].confirmed, "Referee already confirmed.");
         require(referees[_referee].suggestedBy != msg.sender, "Cannot confirm referee suggested by self.");
         referees[_referee].confirmed = true;
+        betfactory.pushBet(_referee);
     }
     
     function getPrize() public view returns (uint256) {
