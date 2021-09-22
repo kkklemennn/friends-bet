@@ -13,6 +13,7 @@ The idea is simple:
 2. Enter the bet and wait for other players to enter aswell.
 3. You or other players that have also entered can now invite new players to join or suggest different referees.
 4. Confirm a referee suggested by another player or wait for some player to confirm your suggested referee.
+5. Wait for the winner to be picked by the referee.
 
 ## Possible further improvements
 
